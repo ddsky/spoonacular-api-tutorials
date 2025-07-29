@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Building a Simple Recipe Search App with the Spoonacular API</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+            background-color: #f9f9f9;
+        }
+        
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        
+        h2 {
+            color: #34495e;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            padding-left: 10px;
+            border-left: 4px solid #3498db;
+        }
+        
+        h3 {
+            color: #2c3e50;
+            margin-top: 30px;
+        }
+        
+        .intro {
+            background: #ecf0f1;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+            border-left: 5px solid #3498db;
+        }
+        
+        .highlight {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+            margin: 20px 0;
+            font-style: italic;
+            color: #6c757d;
+        }
+        
+        code {
+            background: #f1f3f4;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #2c3e50;
+            border: 1px solid #e9ecef;
+        }
+        
+        pre {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 24px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 24px 0;
+            border: 1px solid #4a5568;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+            border: none;
+        }
+        
+        .api-example {
+            background: #f8f9fa;
+            padding: 16px 20px;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            margin: 16px 0;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #495057;
+            overflow-x: auto;
+        }
+        
+        .warning {
+            background: #fff8e1;
+            padding: 16px 20px;
+            border-radius: 6px;
+            border-left: 4px solid #ff9800;
+            margin: 16px 0;
+            color: #bf360c;
+        }
+        
+        .step-number {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        
+        ol {
+            padding-left: 0;
+        }
+        
+        ol li {
+            margin-bottom: 10px;
+            list-style: none;
+            padding-left: 20px;
+        }
+        
+        ul {
+            margin: 15px 0;
+        }
+        
+        ul li {
+            margin-bottom: 8px;
+        }
+        
+        strong {
+            color: #2c3e50;
+        }
+        
+        em {
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        
+        .conclusion {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-top: 40px;
+            text-align: left;
+        }
+        
+        .conclusion h2 {
+            color: white;
+            border: none;
+            margin-bottom: 20px;
+        }
+        
+        .conclusion strong {
+            color: white;
+        }
+        
+        .emoji {
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Building a Simple Recipe Search App with the Spoonacular API <span class="emoji">🍽️</span></h1>
+        
+        <div class="intro">
+            <p><strong>Welcome, new developers!</strong> If you've just signed up for Spoonacular's Food API and obtained your API key, this tutorial will guide you through creating a <strong>simple recipe search application</strong> using plain HTML, CSS, and JavaScript. No frameworks or SDKs required -- we'll use the Spoonacular API directly via <code>fetch</code>.</p>
+            
+            <p>By the end, you'll have a small web app where users can type a query (like "pasta" or "chicken") and see a list of recipe results with images, titles, and macro nutrition info (calories, proteins, carbs, fats).</p>
+        </div>
+
+        <div class="highlight">
+            <p><em>Spoonacular's Recipe API can return delicious recipe images and nutritional info. For example, a search for "fajitas" might return results like this Skirt Steak Fajitas dish. Our app will fetch such recipes and display their images, titles, and key nutrition facts.</em></p>
+        </div>
+
+        <p>This tutorial assumes you already have an API key from spoonacular.com and are ready to use it (if not, get a <a href="https://spoonacular.com/food-api/console">free key now</a>). We'll walk through the process <strong>step by step</strong> in a beginner-friendly way. Here's what we'll do:</p>
+
+        <ol>
+            <li><strong>Set up a basic HTML page</strong> with a search bar and a section to display results.</li>
+            <li><strong>Understand the Spoonacular API endpoint</strong> for searching recipes by keyword.</li>
+            <li><strong>Write JavaScript code</strong> to call the API (using your API key) when the user searches.</li>
+            <li><strong>Display the results</strong> on the page, including each recipe's image, title, and macro-nutrient info (calories, carbs, protein, fat).</li>
+            <li><strong>Provide the complete HTML code</strong> so you can copy, paste, add your API key, and run it on your own machine.</li>
+        </ol>
+
+        <p>Let's get started!</p>
+
+        <h2><span class="step-number">1</span>Creating the Basic HTML Structure</h2>
+
+        <p>First, create a new HTML file (for example, <code>index.html</code>). We'll set up a simple structure with a header, an input for the search query, a button to trigger the search, and a container where we'll display our recipe results.</p>
+
+        <p>Your HTML file might start like this:</p>
+
+        <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title&gt;Spoonacular Recipe Search App&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div class="container"&gt;
+    &lt;h1&gt;Spoonacular Recipe Search&lt;/h1&gt;
+    &lt;div class="search-container"&gt;
+      &lt;input type="text" id="searchInput" placeholder="Search for delicious recipes..."&gt;
+      &lt;button id="searchButton"&gt;Search&lt;/button&gt;
+    &lt;/div&gt;
+
+    &lt;div id="results"&gt;&lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- We will add our script here soon --&gt;
+  &lt;script&gt;
+    // JavaScript code will go here
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+        <p><strong>Explanation:</strong> We include a text <code>&lt;input&gt;</code> for the user's search term and a <code>&lt;button&gt;</code> to start the search. The <code>id</code> attributes (<code>searchInput</code>, <code>searchButton</code>, <code>results</code>) will help us access these elements in JavaScript. The <code>&lt;div id="results"&gt;&lt;/div&gt;</code> is where we'll inject the recipe results (like images, titles, etc.) dynamically. We've also added a <code>&lt;script&gt;</code> tag at the bottom of the body where our JavaScript code will live (placing the script at the end ensures the HTML elements are loaded before the script runs).</p>
+
+        <h2><span class="step-number">2</span>Understanding the Spoonacular Recipe Search API</h2>
+
+        <p>Next, let's understand which Spoonacular API endpoint we need. Spoonacular provides a <strong>"Search Recipes"</strong> endpoint (also known as <strong>Complex Search</strong>) that lets us search through thousands of recipes by keyword. We'll use this endpoint to find recipes by a query term (like <code>"pizza"</code> or <code>"tofu stir fry"</code>). The base URL is:</p>
+
+        <div class="api-example">
+            <code>https://api.spoonacular.com/recipes/complexSearch</code>
+        </div>
+
+        <p>When calling this endpoint, we can add query parameters to refine our search. At minimum, we should provide:</p>
+
+        <ul>
+            <li><code>query</code> -- the search term (e.g., <code>query=pasta</code>). This tells the API what recipes to search for by name or ingredients.</li>
+            <li><code>apiKey</code> -- your unique API key (e.g., <code>apiKey=YOUR_API_KEY</code>). This authenticates your requests. Without this, the API will reject the call.</li>
+            <li>Optionally, <code>number</code> -- how many results to return. If not specified, the API might return a default number (typically 10). We can use this to limit results, say <code>number=5</code> for 5 recipes.</li>
+        </ul>
+
+        <p>To fulfill our app's requirements, we also want <strong>nutritional information</strong> for each recipe result (specifically the macronutrients: calories, carbohydrates, protein, and fat). Spoonacular's API has a handy parameter for this: <code>addRecipeNutrition=true</code>. According to the documentation, setting this to true will include detailed nutritional info for each recipe in the search results. That means we don't have to call a separate nutrition endpoint for each recipe -- we get the data in one go.</p>
+
+        <div class="highlight">
+            <p><strong>Macronutrients?</strong> These are the key nutrition figures like <strong>calories, protein, fat, and carbohydrates</strong>. The Spoonacular API will provide these values per recipe when we request nutrition data. We'll extract those to display to the user.</p>
+        </div>
+
+        <p><strong>Example API Request:</strong> If a user searches for "burger", our front-end will construct a URL like:</p>
+
+        <div class="api-example">
+            <code>https://api.spoonacular.com/recipes/complexSearch?query=burger&number=5&addRecipeNutrition=true&apiKey=YOUR_API_KEY</code>
+        </div>
+
+        <p>This asks the API for 5 burger recipes, including nutrition info, using your API key for authorization. The response will be in JSON format (JavaScript Object Notation), containing an array of recipe results. Each recipe in the results will have fields such as <code>id</code>, <code>title</code>, <code>image</code> (a URL to the recipe's image), and a <code>nutrition</code> object with a list of nutrients. For example, a single result might look like this (simplified):</p>
+
+        <pre><code>{
+  "id": 716429,
+  "title": "Pasta with Garlic, Scallions, Cauliflower & Breadcrumbs",
+  "image": "https://img.spoonacular.com/recipes/716429-312x231.jpg",
+  "imageType": "jpg",
+  "nutrition": {
+      "nutrients": [
+          { "name": "Calories", "amount": 584.3, "unit": "kcal" },
+          { "name": "Fat", "amount": 20.1, "unit": "g" },
+          { "name": "Carbohydrates", "amount": 72.0, "unit": "g" },
+          { "name": "Protein", "amount": 19.5, "unit": "g" },
+          ... // other nutrients
+      ]
+  }
+}</code></pre>
+
+        <p>As you can see, we get everything we need: the recipe title, an image URL, and the nutrition info including calories, fat, carbs, and protein. (The API actually returns many more details and nutrients, but we'll focus only on the macros for this tutorial.)</p>
+
+        <h2><span class="step-number">3</span>Writing the JavaScript Fetch Function</h2>
+
+        <p>With our HTML in place and a clear idea of the API call, it's time to code the logic. We'll use the Fetch API in JavaScript to send a GET request to Spoonacular and handle the response.</p>
+
+        <p>Inside the <code>&lt;script&gt;</code> tag of our HTML, let's do the following:</p>
+
+        <ul>
+            <li><strong>Grab references to the HTML elements</strong> we need to work with (the search input, the button, and the results container).</li>
+            <li><strong>Attach an event listener</strong> to the search button (so that when it's clicked, we trigger a function to perform the search).</li>
+            <li><strong>Define the search function</strong> to build the API URL, make the fetch call, and process the results.</li>
+            <li><strong>Display the results</strong> or a message if none are found.</li>
+        </ul>
+
+        <p>We'll start by selecting the elements and adding the event listener:</p>
+
+        <pre><code>const searchInput = document.getElementById('searchInput');
+const searchButton = document.getElementById('searchButton');
+const resultsDiv = document.getElementById('results');
+
+// When the button is clicked, run the search function
+searchButton.addEventListener('click', searchRecipes);
+
+// when the user presses "Enter" in the input, also run the search function
+searchInput.addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') {
+        searchRecipes();
+    }
+});</code></pre>
+
+        <p>Here we used <code>document.getElementById</code> to get our elements by their IDs. The <code>addEventListener('click', searchRecipes)</code> will call a function named <code>searchRecipes</code> whenever the user clicks the "Search" button. We'll define <code>searchRecipes</code> next.</p>
+
+        <p>Now, let's write the <code>searchRecipes</code> function. This function will:</p>
+
+        <ol>
+            <li>Read the query from the input field.</li>
+            <li>Check that it's not empty.</li>
+            <li>Construct the request URL with the query and your API key.</li>
+            <li>Use <code>fetch()</code> to call the Spoonacular API.</li>
+            <li>Convert the response to JSON.</li>
+            <li>Handle the JSON data -- create HTML elements for each recipe and insert them into the results container.</li>
+            <li>Handle any errors that occur during the fetch.</li>
+        </ol>
+
+        <pre><code>function searchRecipes() {
+  const query = searchInput.value.trim();           // get the search term from input
+  if (!query) {                                     // if the query is empty, do nothing
+    alert('Please enter a search term.');
+    return;
+  }
+
+  // Construct the API URL with query and API key
+  const apiKey = 'YOUR_API_KEY';  // &lt;-- replace with your actual Spoonacular API key
+  const apiUrl = `https://api.spoonacular.com/recipes/complexSearch?query=${encodeURIComponent(query)}&number=5&addRecipeNutrition=true&apiKey=${apiKey}`;
+
+  // Clear any previous results
+  resultsDiv.innerHTML = '&lt;p&gt;Searching for recipes...&lt;/p&gt;';
+
+  // Call the Spoonacular API
+  fetch(apiUrl)
+    .then(response =&gt; response.json())
+    .then(data =&gt; {
+      // Clear the placeholder text
+      resultsDiv.innerHTML = '';
+      if (!data.results || data.results.length === 0) {
+        resultsDiv.innerHTML = '&lt;div class="no-results"&gt;No recipes found. Try a different search term!&lt;/div&gt;';
+        return;
+      }
+
+      // Loop through each recipe result
+      data.results.forEach(recipe =&gt; {
+        // Extract data we need
+        const title = recipe.title;
+        const image = recipe.image;
+
+        // The nutrition info is an array of nutrient objects. Find the ones for Calories, Protein, Fat, Carbs:
+        let calories = '', protein = '', fat = '', carbs = '';
+        if (recipe.nutrition && recipe.nutrition.nutrients) {
+          const nutrients = recipe.nutrition.nutrients;
+          const calInfo = nutrients.find(n =&gt; n.name === 'Calories');
+          const proteinInfo = nutrients.find(n =&gt; n.name === 'Protein');
+          const fatInfo = nutrients.find(n =&gt; n.name === 'Fat');
+          const carbsInfo = nutrients.find(n =&gt; n.name === 'Carbohydrates');
+          if (calInfo)    calories = Math.round(calInfo.amount) + ' ' + calInfo.unit;
+          if (proteinInfo) protein = Math.round(proteinInfo.amount) + ' ' + proteinInfo.unit;
+          if (fatInfo)     fat = Math.round(fatInfo.amount) + ' ' + fatInfo.unit;
+          if (carbsInfo)   carbs = Math.round(carbsInfo.amount) + ' ' + carbsInfo.unit;
+        }
+
+        // Create a container div for this recipe
+        const recipeDiv = document.createElement('div');
+        recipeDiv.className = 'recipe';  // for potential styling
+
+        // Build the inner HTML for the recipe (image, title, and nutrition info)
+        recipeDiv.innerHTML = `
+          &lt;h3&gt;${title}&lt;/h3&gt;
+          &lt;img src="${image}" alt="${title}"&gt;
+          &lt;p&gt;&lt;strong&gt;Calories:&lt;/strong&gt; ${calories}&lt;/p&gt;
+          &lt;p&gt;&lt;strong&gt;Carbs:&lt;/strong&gt; ${carbs}&lt;/p&gt;
+          &lt;p&gt;&lt;strong&gt;Protein:&lt;/strong&gt; ${protein}&lt;/p&gt;
+          &lt;p&gt;&lt;strong&gt;Fat:&lt;/strong&gt; ${fat}&lt;/p&gt;
+        `;
+
+        // Append this recipe's HTML to the results container
+        resultsDiv.appendChild(recipeDiv);
+      });
+    })
+    .catch(error =&gt; {
+      console.error('Error fetching recipes:', error);
+      resultsDiv.innerHTML = '&lt;div class="error"&gt;An error occurred while fetching recipes. Please try again.&lt;/div&gt;';
+    });
+}</code></pre>
+
+        <div class="warning">
+            <p><strong>Important:</strong> Make sure to replace <code>'YOUR_API_KEY'</code> with your actual Spoonacular API key for the app to work properly.</p>
+        </div>
+
+        <h2><span class="step-number">4</span>Testing the App (What to Expect)</h2>
+
+        <p>To test, enter a food or recipe keyword in the search box and click <strong>Search</strong>. For example, try searching <code>"pasta"</code>. The app will make a request to Spoonacular and soon display a list of recipes related to pasta. You should see something like a recipe for <em>"Pasta with Garlic, Scallions, Cauliflower & Breadcrumbs"</em> with its image and nutrition info, among other results. If you search <code>"chocolate chip cookies"</code>, you might get recipes for various cookie variations, each with an image and the calories/carbs/protein/fat listed.</p>
+
+        <p>If no recipes are found for a given query, the app will simply show "No recipes found. Try a different search term." This might happen with very obscure searches or typos.</p>
+
+        <p>Make sure you didn't forget to replace <code>YOUR_API_KEY</code> with your actual key. If you use an invalid key or exceed your API quota, the API might respond with an error (and our <code>.catch</code> will handle it by showing an error message). If that happens, double-check your key and also check the browser console for any error details. Spoonacular's free tier has a certain number of calls per day; ensure you're within that limit.</p>
+
+        <h2><span class="step-number">5</span>Full HTML Code Example</h2>
+
+        <p>For convenience, here is the <strong>entire HTML code</strong> combining all the pieces we discussed. You can copy this, replace the placeholder with your API key, and open it in your browser to try it out:</p>
+
+        <pre><code>&lt;!DOCTYPE html&gt;
+  &lt;html&gt;
+    &lt;head&gt;
+      &lt;meta charset="UTF-8"&gt;
+      &lt;title&gt;Recipe Search App&lt;/title&gt;
+      &lt;style&gt;
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          background: linear-gradient(135deg, #1fc66b 0%, #10552f 100%);
+          min-height: 100vh;
+          padding: 2rem;
+          color: #333;
+        }
+
+        .container {
+          max-width: 1200px;
+          margin: 0 auto;
+          background: rgba(255, 255, 255, 0.95);
+          border-radius: 20px;
+          padding: 2rem;
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+          backdrop-filter: blur(10px);
+        }
+
+        h1 {
+          text-align: center;
+          color: #2c3e50;
+          font-size: 2.5rem;
+          margin-bottom: 2rem;
+          text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-container {
+          display: flex;
+          gap: 1rem;
+          margin-bottom: 2rem;
+          max-width: 600px;
+          margin-left: auto;
+          margin-right: auto;
+        }
+
+        #searchInput {
+          flex: 1;
+          padding: 1rem 1.5rem;
+          font-size: 1.1rem;
+          border: 2px solid #e1e8ed;
+          border-radius: 50px;
+          outline: none;
+          transition: all 0.3s ease;
+          background: white;
+        }
+
+        #searchInput:focus {
+          border-color: #00843c;
+          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+          transform: translateY(-2px);
+        }
+
+        #searchButton {
+          padding: 1rem 2rem;
+          font-size: 1.1rem;
+          font-weight: 600;
+          background: linear-gradient(135deg, #1fc66b 0%, #10552f 100%);
+          color: white;
+          border: none;
+          border-radius: 50px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        #searchButton:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgb(0, 132, 60);
+        }
+
+        #searchButton:active {
+          transform: translateY(0);
+        }
+
+        #results {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+          gap: 2rem;
+          margin-top: 2rem;
+        }
+
+        .recipe {
+          background: white;
+          border-radius: 15px;
+          padding: 1.5rem;
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+          border: 1px solid rgba(0, 0, 0, 0.05);
+          overflow: hidden;
+        }
+
+        .recipe:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .recipe h3 {
+          color: #2c3e50;
+          font-size: 1.4rem;
+          margin-bottom: 1rem;
+          line-height: 1.3;
+          font-weight: 600;
+        }
+
+        .recipe img {
+          width: 100%;
+          height: 200px;
+          object-fit: cover;
+          border-radius: 10px;
+          margin-bottom: 1rem;
+          transition: transform 0.3s ease;
+        }
+
+        .recipe:hover img {
+          transform: scale(1.05);
+        }
+
+        .nutrition-info {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 0.5rem;
+          margin-top: 1rem;
+        }
+
+        .recipe p {
+          margin: 0.3rem 0;
+          font-size: 0.95rem;
+          color: #555;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0.5rem;
+          background: #f8f9fa;
+          border-radius: 8px;
+        }
+
+        .recipe p strong {
+          color: #2c3e50;
+          font-weight: 600;
+        }
+
+        .error {
+          color: #e74c3c;
+          text-align: center;
+          font-size: 1.1rem;
+          padding: 2rem;
+          background: rgba(231, 76, 60, 0.1);
+          border-radius: 10px;
+          border: 1px solid rgba(231, 76, 60, 0.2);
+        }
+
+        .loading {
+          text-align: center;
+          font-size: 1.1rem;
+          color: #667eea;
+          padding: 2rem;
+        }
+
+        .no-results {
+          text-align: center;
+          font-size: 1.1rem;
+          color: #7f8c8d;
+          padding: 2rem;
+          background: rgba(127, 140, 141, 0.1);
+          border-radius: 10px;
+          border: 1px solid rgba(127, 140, 141, 0.2);
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+          body {
+            padding: 1rem;
+          }
+
+          .container {
+            padding: 1.5rem;
+            border-radius: 15px;
+          }
+
+          h1 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+          }
+
+          .search-container {
+            flex-direction: column;
+            gap: 1rem;
+          }
+
+          #searchInput, #searchButton {
+            padding: 0.8rem 1.2rem;
+            font-size: 1rem;
+          }
+
+          #results {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+          }
+
+          .nutrition-info {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .container {
+            padding: 1rem;
+          }
+
+          h1 {
+            font-size: 1.8rem;
+          }
+
+          .recipe {
+            padding: 1rem;
+          }
+        }
+      &lt;/style&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+    &lt;div class="container"&gt;
+      &lt;h1&gt;Recipe Search&lt;/h1&gt;
+      &lt;div class="search-container"&gt;
+        &lt;input type="text" id="searchInput" placeholder="Search for delicious recipes..."&gt;
+        &lt;button id="searchButton"&gt;Search&lt;/button&gt;
+      &lt;/div&gt;
+
+      &lt;div id="results"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;script&gt;
+      const searchInput = document.getElementById('searchInput');
+      const searchButton = document.getElementById('searchButton');
+      const resultsDiv = document.getElementById('results');
+
+      searchButton.addEventListener('click', searchRecipes);
+
+      searchInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+          searchRecipes();
+        }
+      });
+
+      function searchRecipes() {
+        const query = searchInput.value.trim();
+        if (!query) {
+          alert('Please enter a search term.');
+          return;
+        }
+        const apiKey = 'YOUR_API_KEY';  // &lt;-- Replace with your spoonacular API key
+        const apiUrl = `https://api.spoonacular.com/recipes/complexSearch?query=${encodeURIComponent(query)}&number=5&addRecipeNutrition=true&apiKey=${apiKey}`;
+
+        resultsDiv.innerHTML = '&lt;p&gt;Searching for recipes...&lt;/p&gt;';
+
+        fetch(apiUrl)
+          .then(response =&gt; response.json())
+          .then(data =&gt; {
+            resultsDiv.innerHTML = '';
+            if (!data.results || data.results.length === 0) {
+              resultsDiv.innerHTML = '&lt;div class="no-results"&gt;No recipes found. Try a different search term!&lt;/div&gt;';
+              return;
+            }
+            data.results.forEach(recipe =&gt; {
+              const title = recipe.title;
+              const image = recipe.image;
+              let calories = '', protein = '', fat = '', carbs = '';
+              if (recipe.nutrition && recipe.nutrition.nutrients) {
+                const nutrients = recipe.nutrition.nutrients;
+                const calInfo = nutrients.find(n =&gt; n.name === 'Calories');
+                const proteinInfo = nutrients.find(n =&gt; n.name === 'Protein');
+                const fatInfo = nutrients.find(n =&gt; n.name === 'Fat');
+                const carbsInfo = nutrients.find(n =&gt; n.name === 'Carbohydrates');
+                if (calInfo) calories = Math.round(calInfo.amount) + ' ' + calInfo.unit;
+                if (proteinInfo) protein = Math.round(proteinInfo.amount) + ' ' + proteinInfo.unit;
+                if (fatInfo) fat = Math.round(fatInfo.amount) + ' ' + fatInfo.unit;
+                if (carbsInfo) carbs = Math.round(carbsInfo.amount) + ' ' + carbsInfo.unit;
+              }
+              const recipeDiv = document.createElement('div');
+              recipeDiv.className = 'recipe';
+              recipeDiv.innerHTML = `
+            &lt;h3&gt;${title}&lt;/h3&gt;
+            &lt;img src="${image}" alt="${title}"&gt;
+            &lt;p&gt;&lt;strong&gt;Calories:&lt;/strong&gt; ${calories}&lt;/p&gt;
+            &lt;p&gt;&lt;strong&gt;Carbs:&lt;/strong&gt; ${carbs}&lt;/p&gt;
+            &lt;p&gt;&lt;strong&gt;Protein:&lt;/strong&gt; ${protein}&lt;/p&gt;
+            &lt;p&gt;&lt;strong&gt;Fat:&lt;/strong&gt; ${fat}&lt;/p&gt;
+          `;
+              resultsDiv.appendChild(recipeDiv);
+            });
+          })
+          .catch(error =&gt; {
+            console.error('Error fetching recipes:', error);
+            resultsDiv.innerHTML = '&lt;div class="error"&gt;Error fetching recipes. Please try again later.&lt;/div&gt;';
+          });
+      }
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+        </code></pre>
+
+        <div class="warning">
+            <p><strong>👉 Now just replace</strong> <code>"YOUR_API_KEY"</code> <strong>with your actual key</strong>, save the file, and open it in your browser. You should be able to search for recipes and see results appear with images and nutrition info.</p>
+        </div>
+
+        <div class="conclusion">
+            <h2>Conclusion</h2>
+            <p><strong>Congratulations! <span class="emoji">🎊</span></strong> You've built a fully functional recipe search app using the Spoonacular API. In this process, you learned how to make API calls with fetch, handle JSON responses, and update the DOM with results. We kept things simple with vanilla JavaScript to help you understand the fundamentals.</p>
+            
+            <p>From here, you can enhance the app in many ways -- for example, add loading spinners, improve the layout with CSS, allow pressing "Enter" to trigger search, or even add more details like recipe summary or ingredients.</p>
+            
+            <p>Using Spoonacular's rich API, you have access to a treasure trove of food data. We only scratched the surface by using the basic search with macro nutrients. Feel free to explore other endpoints (the API can get detailed recipe instructions, similar recipes, ingredient lists, and more as seen in their docs).</p>
+            
+            <p><strong>Happy coding and happy cooking! <span class="emoji">🍲👩‍💻👨‍💻</span></strong></p>
+        </div>
+    </div>
+</body>
+</html>
